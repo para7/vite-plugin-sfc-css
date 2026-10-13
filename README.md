@@ -1,5 +1,8 @@
 # sfc-css
 
+[![ci](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/ci.yml)
+[![frameworks](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/frameworks.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/frameworks.yml)
+
 Vue / Svelte の `<style>` のように、`.tsx` の中に CSS を書ける Vite プラグインです。特殊な構文は使わず、CSS Modules 互換で動きます。
 
 ```tsx
