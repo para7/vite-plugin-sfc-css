@@ -1,0 +1,34 @@
+name: frameworks
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - plugins/sfc-css.ts
+      - src/sfc-css.d.ts
+      - frameworks/**
+      - .github/workflows/frameworks.yml
+  pull_request:
+    paths:
+      - plugins/sfc-css.ts
+      - src/sfc-css.d.ts
+      - frameworks/**
+      - .github/workflows/frameworks.yml
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [react-router, tanstack-react, tanstack-solid, solid-start, solid-spa, vinext]
+        mode: [build, dev]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
+        working-directory: frameworks/${{ matrix.app }}
+      - run: pnpm exec playwright install --with-deps --only-shell chromium
+      - run: pnpm test:frameworks -- --project=${{ matrix.app }}:${{ matrix.mode }}
