@@ -1,5 +1,5 @@
 {
-  "name": "sfc-css-react",
+  "name": "vite-plugin-sfc-css",
   "private": true,
   "license": "ISC",
   "version": "0.0.0",

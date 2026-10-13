@@ -1,7 +1,7 @@
 # sfc-css
 
-[![ci](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/ci.yml)
-[![frameworks](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/frameworks.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-styling/actions/workflows/frameworks.yml)
+[![ci](https://github.com/para7/vite-plugin-sfc-css/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-css/actions/workflows/ci.yml)
+[![frameworks](https://github.com/para7/vite-plugin-sfc-css/actions/workflows/frameworks.yml/badge.svg?branch=master)](https://github.com/para7/vite-plugin-sfc-css/actions/workflows/frameworks.yml)
 
 Vue / Svelte の `<style>` のように、`.tsx` の中に CSS を書ける Vite プラグインです。特殊な構文は使わず、CSS Modules 互換で動きます。
 
@@ -29,11 +29,11 @@ const styles = css`
 - `plugins/sfc-css.ts`: プラグイン本体
 - `src/sfc-css.d.ts`: `virtual:sfc-css` の型。tsconfig の `include` に入る場所に置いてください
 
-master の最新版は [Releases](https://github.com/para7/vite-plugin-sfc-styling/releases/latest) からダウンロードできます。
+master の最新版は [Releases](https://github.com/para7/vite-plugin-sfc-css/releases/latest) からダウンロードできます。
 
 ```sh
-curl -LO https://github.com/para7/vite-plugin-sfc-styling/releases/latest/download/sfc-css.ts
-curl -LO https://github.com/para7/vite-plugin-sfc-styling/releases/latest/download/sfc-css.d.ts
+curl -LO https://github.com/para7/vite-plugin-sfc-css/releases/latest/download/sfc-css.ts
+curl -LO https://github.com/para7/vite-plugin-sfc-css/releases/latest/download/sfc-css.d.ts
 ```
 
 ```ts
