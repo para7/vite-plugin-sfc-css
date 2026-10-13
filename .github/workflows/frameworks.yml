@@ -23,12 +23,14 @@ jobs:
       fail-fast: false
       matrix:
         app: [react-router, tanstack-react, tanstack-solid, solid, solid-spa, vinext]
-        mode: [build, dev]
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
       - run: pnpm install --frozen-lockfile
       - run: pnpm install --frozen-lockfile
         working-directory: frameworks/${{ matrix.app }}
-      - run: pnpm exec playwright install --with-deps --only-shell chromium
-      - run: pnpm test:frameworks -- --project=${{ matrix.app }}:${{ matrix.mode }}
+      - run: pnpm exec playwright install --only-shell chromium
+      # 1 回の playwright で両方を指定すると、同じアプリの build と dev が同時に起動して競合する
+      - run: pnpm test:frameworks -- --project=${{ matrix.app }}:build
+      - run: pnpm test:frameworks -- --project=${{ matrix.app }}:dev
+        if: ${{ !cancelled() }}
