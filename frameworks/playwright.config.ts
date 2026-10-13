@@ -17,7 +17,7 @@ const apps: { name: string; buildPort: number; devPort: number; build: string }[
   { name: 'react-router', buildPort: 4311, devPort: 4312, build: 'pnpm build && pnpm start' },
   { name: 'tanstack-react', buildPort: 4321, devPort: 4322, build: 'pnpm build && pnpm start' },
   { name: 'tanstack-solid', buildPort: 4331, devPort: 4332, build: 'pnpm build && pnpm start' },
-  { name: 'solid-start', buildPort: 4341, devPort: 4342, build: 'pnpm build && pnpm start' },
+  { name: 'solid', buildPort: 4341, devPort: 4342, build: 'pnpm build && pnpm start' },
   { name: 'solid-spa', buildPort: 4351, devPort: 4352, build: 'pnpm build && pnpm preview' },
   { name: 'vinext', buildPort: 4361, devPort: 4362, build: 'pnpm build && pnpm start' },
 ]

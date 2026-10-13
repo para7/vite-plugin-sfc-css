@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [react-router, tanstack-react, tanstack-solid, solid-start, solid-spa, vinext]
+        app: [react-router, tanstack-react, tanstack-solid, solid, solid-spa, vinext]
         mode: [build, dev]
     steps:
       - uses: actions/checkout@v4

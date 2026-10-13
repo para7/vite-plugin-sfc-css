@@ -4,13 +4,10 @@ const HOME = 'rgb(255, 0, 0)'
 const OTHER = 'rgb(0, 0, 255)'
 const CLIENT = 'rgb(0, 128, 0)'
 
-const failOnConsole = (page: Page, project: string) => {
+const failOnConsole = (page: Page) => {
   const errors: string[] = []
-  // SolidStart の dev が Vite 8 で source-map-js の読み込みに失敗する。プラグインを外しても同じ
-  const framework = (text: string) =>
-    project.startsWith('solid-start') && text.includes("does not provide an export named 'SourceMapConsumer'")
   const push = (text: string) => {
-    if (!framework(text)) errors.push(text)
+    errors.push(text)
   }
   page.on('pageerror', (error) => push(error.message))
   page.on('console', (msg) => {
@@ -20,7 +17,7 @@ const failOnConsole = (page: Page, project: string) => {
 }
 
 test('クライアント遷移後もルートの css が当たる', async ({ page }, info) => {
-  const errors = failOnConsole(page, info.project.name)
+  const errors = failOnConsole(page)
   const vinext = info.project.name.startsWith('vinext')
   await page.goto('/', { waitUntil: 'networkidle' })
   await expect(page.getByTestId('home')).toHaveCSS('color', HOME)

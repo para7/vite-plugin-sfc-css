@@ -85,7 +85,7 @@ dev では `[sfc-css]` を付けて Vite のロガーに出します。ファイ
 pnpm dev        # src/App.tsx のデモ
 pnpm test       # vitest: transform / build / dev サーバー
 pnpm test:e2e   # playwright: 実ブラウザで HMR を確認 (初回は pnpm exec playwright install --only-shell chromium)
-pnpm test:frameworks  # playwright: 実フレームワークの build と dev (React Router、TanStack Start の React / Solid、SolidStart、Solid SPA、vinext)
+pnpm test:frameworks  # playwright: 実フレームワークの build と dev (React Router、TanStack Start の React / Solid、Solid の start mode、Solid SPA、vinext)
 pnpm bench      # vite build の時間
 pnpm bench:dev  # dev サーバーの起動・初回ロード・CSS だけの HMR の時間 (実ブラウザ)
 ```
