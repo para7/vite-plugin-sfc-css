@@ -10,6 +10,7 @@
 - `e2e/`: playwright。専用アプリ `e2e/app/` で実ブラウザの HMR を確認する。テストは gitignore された `Counter.tsx` を書き換え、元の内容は `Counter.base.tsx`
 - `src/App.tsx`: デモ
 - `bench/`: ベンチマーク。`lib.ts` が `css` 版と `.module.css` 版のコンポーネントを `.bench/` に生成し、`build.ts` が vite build、`dev.ts` が dev サーバー (playwright で実ブラウザ) を計測する。結果は README.md に載せている
+- `frameworks/`: 実フレームワークの build / dev。プラグインは各アプリの `predev` / `prebuild` がコピーする (相対 import や symlink にすると、プラグイン内の `vite` がリポジトリ側を見てしまう)。作り方とバージョンは `frameworks/README.md`
 
 ## 方針
 
@@ -20,7 +21,7 @@
 
 ## コマンド
 
-- `pnpm test` / `pnpm test:e2e` / `pnpm build` (`tsc -b` を含む) / `pnpm lint`
+- `pnpm test` / `pnpm test:e2e` / `pnpm test:frameworks` / `pnpm build` (`tsc -b` を含む) / `pnpm lint`
 - `pnpm bench` / `pnpm bench:dev` (引数: ファイル数 クラス数 回数)。プラグインの処理を変えたら測り直し、README.md の数値を更新する
 - Claude Code のサンドボックス内では、`pnpm add` は pnpm ストアへの書き込みで失敗する。dev サーバーへの接続もコマンドごとにネットワークが分かれるので失敗する。このプロジェクトでは、依存追加・テスト・dev サーバーを使う検証はサンドボックス外で実行してよい (ユーザー了承済み)
 

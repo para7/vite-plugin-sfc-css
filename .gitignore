@@ -28,3 +28,7 @@ test-results
 playwright-report
 e2e/app/Counter.tsx
 .bench
+
+# frameworks の predev / prebuild がコピーする
+frameworks/*/plugins/sfc-css.ts
+frameworks/*/src/sfc-css.d.ts

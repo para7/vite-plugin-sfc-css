@@ -253,9 +253,9 @@ describe('build', () => {
     expect(after.b.root).toBe(before.b.root)
   })
 
-  test('クエリ付き id (`?pick=...&lang.tsx` 等) で読まれても、クエリを除いたファイルと同じ結果になる', async () => {
+  test.each(['?pick=a&lang.ts', '?tsr-split=component'])('クエリ付き id (%s) で読まれても、クエリを除いたファイルと同じ結果になる', async (query) => {
     const plain = (await bundle(fixture({ 'c.ts': comp(), 'comp.ts': `export * from './c.ts'` }))).mod
-    const { css, mod } = await bundle(fixture({ 'c.ts': comp(), 'comp.ts': `export * from './c.ts?pick=a&lang.ts'` }))
+    const { css, mod } = await bundle(fixture({ 'c.ts': comp(), 'comp.ts': `export * from './c.ts${query}'` }))
     expect(mod.a.root).toBe(plain.a.root)
     expect(css).toMatch(new RegExp(`\\.${mod.a.root}\\s*\\{\\s*color: red`))
   })

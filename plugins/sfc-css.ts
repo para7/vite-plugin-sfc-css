@@ -26,7 +26,8 @@ import { normalizePath, parseAst, type Plugin, type ResolvedConfig } from 'vite'
 const MODULE_ID = 'virtual:sfc-css'
 // `?inline` `?direct` 等のクエリ付きでも来る
 const VIRTUAL_RE = /^(.*)\.sfc(\d+)\.module\.css(?:\?.*)?$/
-const FILE_RE = /\.[cm]?[jt]sx?$/
+// `$` だけだと `file.tsx?tsr-split=component` のようなクエリ付き id を取りこぼす
+const FILE_RE = /\.[cm]?[jt]sx?(?:\?.*)?$/
 const virtualId = (file: string, i: number) => `${file}.sfc${i}.module.css`
 
 // oxc ESTree。必要なプロパティしか触らないので緩く型付けする

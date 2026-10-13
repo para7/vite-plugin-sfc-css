@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:frameworks": "playwright test --config frameworks/playwright.config.ts",
     "bench": "node bench/build.ts",
     "bench:dev": "node bench/dev.ts"
   },

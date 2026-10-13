@@ -1,0 +1,24 @@
+{
+  "name": "solid",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "node ../copy-plugin.mjs",
+    "prebuild": "node ../copy-plugin.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node dist/server/node.js"
+  },
+  "dependencies": {
+    "@solidjs/router": "^2.0.0-next.38",
+    "@solidjs/web": "^2.0.0-rc.14",
+    "filesystem-routing": "0.4.0",
+    "solid-js": "^2.0.0-rc.14"
+  },
+  "devDependencies": {
+    "@solidjs/vite-plugin": "^3.0.0-next.48",
+    "@types/node": "^24.13.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.0"
+  }
+}
