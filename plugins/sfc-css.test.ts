@@ -236,6 +236,12 @@ async function bundle(root: string, config: InlineConfig = {}) {
   return { css, mod: mod as Record<string, Record<string, string>> }
 }
 
+// vp build (Vite+) は設定ファイルを複数回評価し、最初のインスタンスの config フックが返した css.modules を、
+// そのインスタンスの configResolved を呼ばないまま後のインスタンスへ渡す。その設定を返す
+function firstEvaluation(root: string): InlineConfig {
+  return (sfcCss()[0].config as (c: InlineConfig) => InlineConfig)({ root })
+}
+
 describe('build', () => {
   test('ブロックごとに別スコープになり、クラス名と CSS が対応する', async () => {
     const { css, mod } = await bundle(fixture({ 'comp.ts': comp() }))
@@ -267,6 +273,12 @@ describe('build', () => {
     const dir = fixture({ 'x/c.ts': comp(), 'y/c.ts': comp(), 'comp.ts': `export * as x from './x/c.ts'\nexport * as y from './y/c.ts'` })
     const { mod } = (await bundle(dir)) as unknown as { mod: Record<string, Record<string, Record<string, string>>> }
     expect(mod.x.a.root).not.toBe(mod.y.a.root)
+  })
+
+  test('設定が複数回評価され、configResolved の呼ばれないインスタンスの generateScopedName が使われても動く', async () => {
+    const dir = fixture({ 'comp.ts': comp() })
+    const { mod } = await bundle(dir, firstEvaluation(dir))
+    expect(mod.a.root).toBe((await bundle(dir)).mod.a.root)
   })
 
   test('css.modules.hashPrefix を反映する', async () => {
@@ -461,6 +473,14 @@ describe('dev server', () => {
     await warm(s)
     const p = await s.edit('comp.ts', devComp('red', 'green'))
     expect(s.paths(p)).toContain('/comp.ts')
+  })
+
+  test('設定が複数回評価され、別インスタンスの generateScopedName が入っていても CSS だけの更新にする', async () => {
+    const root = fixture({ 'comp.ts': devComp() })
+    const s = await serve(root, firstEvaluation(root))
+    await warm(s)
+    const p = await s.edit('comp.ts', devComp('red', 'green'))
+    expect(s.paths(p)).toEqual(['/comp.ts.sfc1.module.css'])
   })
 
   test('?inline / ?direct 付きでも読め、クラス名は通常の import と同じ', async () => {
