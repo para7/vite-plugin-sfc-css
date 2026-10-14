@@ -7,6 +7,7 @@ on:
       - plugins/sfc-css.ts
       - src/sfc-css.d.ts
       - .github/workflows/release.yml
+  workflow_dispatch:
 
 permissions:
   contents: write
