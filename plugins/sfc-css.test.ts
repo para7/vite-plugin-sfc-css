@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { build, createServer, mergeConfig, parseAst, preprocessCSS, resolveConfig, type InlineConfig, type Rolldown, type ViteDevServer } from 'vite'
+import { build, createBuilder, createServer, mergeConfig, parseAst, preprocessCSS, resolveConfig, type InlineConfig, type Rolldown, type ViteDevServer } from 'vite'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import sfcCss, { transformSfcCss } from './sfc-css.ts'
 
@@ -236,11 +236,6 @@ async function bundle(root: string, config: InlineConfig = {}) {
   return { css, mod: mod as Record<string, Record<string, string>> }
 }
 
-// vp build で、設定ファイルの最初の評価の config フックが返す設定
-function firstEvaluation(root: string): InlineConfig {
-  return (sfcCss()[0].config as (c: InlineConfig) => InlineConfig)({ root })
-}
-
 describe('build', () => {
   test('ブロックごとに別スコープになり、クラス名と CSS が対応する', async () => {
     const { css, mod } = await bundle(fixture({ 'comp.ts': comp() }))
@@ -274,9 +269,21 @@ describe('build', () => {
     expect(mod.x.a.root).not.toBe(mod.y.a.root)
   })
 
-  test('設定が複数回評価され、configResolved の呼ばれないインスタンスの generateScopedName が使われても動く', async () => {
-    const dir = fixture({ 'comp.ts': comp() })
-    const { mod } = await bundle(dir, firstEvaluation(dir))
+  test('builder.sharedPlugins で environment ごとに設定ファイルを評価し直しても、クラス名は通常の build と同じ', async () => {
+    const dir = fixture({
+      'comp.ts': comp(),
+      'vite.config.ts': `import sfcCss from ${JSON.stringify(path.join(import.meta.dirname, 'sfc-css.ts'))}
+export default { plugins: [sfcCss()], builder: { sharedPlugins: true } }
+`,
+    })
+    const builder = await createBuilder({
+      root: dir,
+      logLevel: 'silent',
+      build: { write: false, lib: { entry: path.join(dir, 'comp.ts'), formats: ['es'], fileName: 'out' } },
+    })
+    const out = (await builder.build(builder.environments.client)) as Rolldown.RolldownOutput[]
+    const js = out[0].output.find((f) => f.type === 'chunk')!.code
+    const mod = await import(`data:text/javascript,${encodeURIComponent(js)}`)
     expect(mod.a.root).toBe((await bundle(dir)).mod.a.root)
   })
 
@@ -472,14 +479,6 @@ describe('dev server', () => {
     await warm(s)
     const p = await s.edit('comp.ts', devComp('red', 'green'))
     expect(s.paths(p)).toContain('/comp.ts')
-  })
-
-  test('設定が複数回評価され、別インスタンスの generateScopedName が入っていても CSS だけの更新にする', async () => {
-    const root = fixture({ 'comp.ts': devComp() })
-    const s = await serve(root, firstEvaluation(root))
-    await warm(s)
-    const p = await s.edit('comp.ts', devComp('red', 'green'))
-    expect(s.paths(p)).toEqual(['/comp.ts.sfc1.module.css'])
   })
 
   test('?inline / ?direct 付きでも読め、クラス名は通常の import と同じ', async () => {

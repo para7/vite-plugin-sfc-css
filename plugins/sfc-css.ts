@@ -189,10 +189,6 @@ const stringHash = (s: string) => {
   return h >>> 0
 }
 
-// 自分が入れた generateScopedName の印。Symbol() でないのは、vp build (Vite+) が設定ファイルを評価し直すたびに
-// このモジュールも別のコピーになるため
-const OWN_SCOPED_NAME = Symbol.for('sfc-css.generateScopedName')
-
 export default function sfcCss(): Plugin[] {
   const cssByFile = new Map<string, string[]>()
   const jsByFile = new Map<string, string>()
@@ -230,30 +226,33 @@ export default function sfcCss(): Plugin[] {
       config(c) {
         const m = c.css?.modules
         const lc = c.css?.lightningcss?.cssModules
-        // vp build は設定ファイルを複数回評価し、最初のインスタンスが入れた関数が、そのインスタンスの configResolved を
-        // 呼ばないまま後のインスタンスに渡ってくる。それはユーザー指定の関数として扱わない
-        const userScopedName =
-          typeof m === 'object' && typeof m.generateScopedName === 'function' && !(OWN_SCOPED_NAME in m.generateScopedName)
-        stableNames = !userScopedName && !(typeof lc === 'object' && lc.pattern?.includes('[content-hash]'))
+        stableNames =
+          !(m && typeof m.generateScopedName === 'function') &&
+          !(typeof lc === 'object' && lc.pattern?.includes('[content-hash]'))
         if (c.css?.transformer === 'lightningcss' || m === false || m?.generateScopedName) return
         // Vite 既定 (postcss-modules) のクラス名は CSS 内容のハッシュで、編集のたびに変わるため
         // CSS だけの HMR ができない。仮想 CSS は「ファイル + ブロック番号」由来の安定名にする。
         // それ以外は Vite 既定 (makeDefaultScopedNameGenerator) と同じ式。
         const prefix = m?.hashPrefix ?? ''
-        // config.root だけにしないのは、上記の vp build では configResolved が呼ばれないため。
+        // config.root だけにしないのは、builder.sharedPlugins で environment ごとに設定を解決し直すと、
+        // configResolved の呼ばれないインスタンスのこの関数が使われるため (TanStack Start の nitro なしの build)。
         // c.root だけにしないのは、後のプラグインの config フックが root を変えることがあるため
         const root = c.root ? path.resolve(c.root) : process.cwd()
-        const generateScopedName = (name: string, filename: string, css: string) => {
-          if (VIRTUAL_RE.test(filename)) {
-            const rel = path.relative(config?.root ?? root, filename.split('?')[0])
-            return `_${name}_${stringHash(prefix + rel).toString(36)}`
-          }
-          const i = css.indexOf(`.${name}`)
-          const line = (i < 0 ? '' : css.slice(0, i)).split(/[\r\n]/).length
-          return `_${name}_${stringHash(prefix + css).toString(36).slice(0, 5)}_${line}`
+        return {
+          css: {
+            modules: {
+              generateScopedName(name: string, filename: string, css: string) {
+                if (VIRTUAL_RE.test(filename)) {
+                  const rel = path.relative(config?.root ?? root, filename.split('?')[0])
+                  return `_${name}_${stringHash(prefix + rel).toString(36)}`
+                }
+                const i = css.indexOf(`.${name}`)
+                const line = (i < 0 ? '' : css.slice(0, i)).split(/[\r\n]/).length
+                return `_${name}_${stringHash(prefix + css).toString(36).slice(0, 5)}_${line}`
+              },
+            },
+          },
         }
-        Object.assign(generateScopedName, { [OWN_SCOPED_NAME]: true })
-        return { css: { modules: { generateScopedName } } }
       },
 
       configResolved(c) {

@@ -20,6 +20,7 @@ const apps: { name: string; buildPort: number; devPort: number; build: string }[
   { name: 'solid', buildPort: 4341, devPort: 4342, build: 'pnpm build && pnpm start' },
   { name: 'solid-spa', buildPort: 4351, devPort: 4352, build: 'pnpm build && pnpm preview' },
   { name: 'vinext', buildPort: 4361, devPort: 4362, build: 'pnpm build && pnpm start' },
+  { name: 'tanstack-vite-plus', buildPort: 4371, devPort: 4372, build: 'pnpm build && pnpm start' },
 ]
 
 const wanted = selected()
