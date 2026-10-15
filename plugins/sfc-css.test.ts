@@ -236,8 +236,7 @@ async function bundle(root: string, config: InlineConfig = {}) {
   return { css, mod: mod as Record<string, Record<string, string>> }
 }
 
-// vp build (Vite+) は設定ファイルを複数回評価し、最初のインスタンスの config フックが返した css.modules を、
-// そのインスタンスの configResolved を呼ばないまま後のインスタンスへ渡す。その設定を返す
+// vp build で、設定ファイルの最初の評価の config フックが返す設定
 function firstEvaluation(root: string): InlineConfig {
   return (sfcCss()[0].config as (c: InlineConfig) => InlineConfig)({ root })
 }

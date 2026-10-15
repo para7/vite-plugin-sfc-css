@@ -189,7 +189,8 @@ const stringHash = (s: string) => {
   return h >>> 0
 }
 
-// 自分が入れた generateScopedName の印。インスタンスをまたいで判定するので Symbol.for
+// 自分が入れた generateScopedName の印。Symbol() でないのは、vp build (Vite+) が設定ファイルを評価し直すたびに
+// このモジュールも別のコピーになるため
 const OWN_SCOPED_NAME = Symbol.for('sfc-css.generateScopedName')
 
 export default function sfcCss(): Plugin[] {
@@ -229,30 +230,30 @@ export default function sfcCss(): Plugin[] {
       config(c) {
         const m = c.css?.modules
         const lc = c.css?.lightningcss?.cssModules
-        // Vite+ の vp build は設定ファイルを複数回評価し、最初のインスタンスが入れた関数がマージ済みの設定として
-        // 後のインスタンスに渡ってくる。それをユーザー指定の関数と区別する
-        const own = m && typeof m.generateScopedName === 'function' && OWN_SCOPED_NAME in m.generateScopedName
-        stableNames =
-          (own || !(m && typeof m.generateScopedName === 'function')) &&
-          !(typeof lc === 'object' && lc.pattern?.includes('[content-hash]'))
+        // vp build は設定ファイルを複数回評価し、最初のインスタンスが入れた関数が、そのインスタンスの configResolved を
+        // 呼ばないまま後のインスタンスに渡ってくる。それはユーザー指定の関数として扱わない
+        const userScopedName =
+          typeof m === 'object' && typeof m.generateScopedName === 'function' && !(OWN_SCOPED_NAME in m.generateScopedName)
+        stableNames = !userScopedName && !(typeof lc === 'object' && lc.pattern?.includes('[content-hash]'))
         if (c.css?.transformer === 'lightningcss' || m === false || m?.generateScopedName) return
         // Vite 既定 (postcss-modules) のクラス名は CSS 内容のハッシュで、編集のたびに変わるため
         // CSS だけの HMR ができない。仮想 CSS は「ファイル + ブロック番号」由来の安定名にする。
         // それ以外は Vite 既定 (makeDefaultScopedNameGenerator) と同じ式。
         const prefix = m?.hashPrefix ?? ''
-        // configResolved の config.root は使わない: 上記の vp build では、この関数が configResolved の
-        // 呼ばれないインスタンスのものとして使われる。解決の仕方は Vite の resolveConfig と同じ
+        // config.root だけにしないのは、上記の vp build では configResolved が呼ばれないため。
+        // c.root だけにしないのは、後のプラグインの config フックが root を変えることがあるため
         const root = c.root ? path.resolve(c.root) : process.cwd()
         const generateScopedName = (name: string, filename: string, css: string) => {
           if (VIRTUAL_RE.test(filename)) {
-            const rel = path.relative(root, filename.split('?')[0])
+            const rel = path.relative(config?.root ?? root, filename.split('?')[0])
             return `_${name}_${stringHash(prefix + rel).toString(36)}`
           }
           const i = css.indexOf(`.${name}`)
           const line = (i < 0 ? '' : css.slice(0, i)).split(/[\r\n]/).length
           return `_${name}_${stringHash(prefix + css).toString(36).slice(0, 5)}_${line}`
         }
-        return { css: { modules: { generateScopedName: Object.assign(generateScopedName, { [OWN_SCOPED_NAME]: true }) } } }
+        Object.assign(generateScopedName, { [OWN_SCOPED_NAME]: true })
+        return { css: { modules: { generateScopedName } } }
       },
 
       configResolved(c) {
