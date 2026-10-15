@@ -234,12 +234,16 @@ export default function sfcCss(): Plugin[] {
         // CSS だけの HMR ができない。仮想 CSS は「ファイル + ブロック番号」由来の安定名にする。
         // それ以外は Vite 既定 (makeDefaultScopedNameGenerator) と同じ式。
         const prefix = m?.hashPrefix ?? ''
+        // config.root だけにしないのは、builder.sharedPlugins で environment ごとに設定を解決し直すと、
+        // configResolved の呼ばれないインスタンスのこの関数が使われるため (TanStack Start の nitro なしの build)。
+        // c.root だけにしないのは、後のプラグインの config フックが root を変えることがあるため
+        const root = c.root ? path.resolve(c.root) : process.cwd()
         return {
           css: {
             modules: {
               generateScopedName(name: string, filename: string, css: string) {
                 if (VIRTUAL_RE.test(filename)) {
-                  const rel = path.relative(config.root, filename.split('?')[0])
+                  const rel = path.relative(config?.root ?? root, filename.split('?')[0])
                   return `_${name}_${stringHash(prefix + rel).toString(36)}`
                 }
                 const i = css.indexOf(`.${name}`)

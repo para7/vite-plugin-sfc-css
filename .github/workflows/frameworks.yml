@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [react-router, tanstack-react, tanstack-solid, solid, solid-spa, vinext]
+        app: [react-router, tanstack-react, tanstack-solid, solid, solid-spa, vinext, tanstack-vite-plus]
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
